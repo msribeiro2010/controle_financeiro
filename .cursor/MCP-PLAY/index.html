@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparador de Preços</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Comparador de Preços</h1>
+            <p>Compare preços em várias lojas e encontre as melhores ofertas!</p>
+        </header>
+
+        <div class="search-container">
+            <div class="search-section">
+                <h2>Busca Geral</h2>
+                <div class="input-group">
+                    <input type="text" id="userInput" placeholder="Digite o nome do produto">
+                    <button id="activateAgent">Comparar Preços</button>
+                </div>
+            </div>
+
+            <div class="search-section promotions">
+                <h2>Buscar Promoções</h2>
+                <div class="input-group">
+                    <input type="text" id="promotionsInput" placeholder="Busque produtos em promoção">
+                    <button id="searchPromotions">Buscar Promoções</button>
+                </div>
+            </div>
+        </div>
+
+        <main id="dashboardContent"></main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 
