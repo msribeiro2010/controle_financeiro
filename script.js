@@ -223,71 +223,58 @@ extratoBtnImprimir.addEventListener('click', imprimirExtrato);
 // Processar formulário de nova transação com tratamento específico para despesas
 formNovaTransacao.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
-    const descricao = document.getElementById('nova-descricao').value;
-    const categoria = document.getElementById('nova-categoria').value;
-    const valor = parseFloat(document.getElementById('novo-valor').value);
-    const tipo = document.getElementById('novo-tipo').value;
-    const data = document.getElementById('nova-data').value;
-    
-    // Verificar se o valor é válido
-    if (isNaN(valor) || valor <= 0) {
-        mostrarNotificacao('Informe um valor válido maior que zero.', 'erro');
-        return;
-    }
-    
-    // Processar comprovante se existir
-    let comprovante = null;
-    if (inputComprovante.files[0]) {
-        comprovante = await getBase64(inputComprovante.files[0]);
-    }
-    
-    // Valor efetivo (positivo para receita, negativo para despesa)
-    const valorEfetivo = tipo === 'receita' ? valor : -valor;
-    
-    console.log('Adicionando nova transação:', {
-        tipo,
-        valor,
-        valorEfetivo,
-        data
-    });
-    
-    // Verificar se a despesa ultrapassaria o limite do cheque especial
-    if (valorEfetivo < 0) {
-        const saldoAtual = transacoes.reduce((acc, t) => acc + t.valor, 0);
-        const novoSaldo = saldoAtual + valorEfetivo;
-        
-        if (novoSaldo < -configuracoes.chequeEspecial) {
-            mostrarNotificacao('Transação não permitida: Limite de cheque especial seria excedido!', 'erro');
+    try {
+        const descricao = document.getElementById('nova-descricao').value;
+        const categoria = document.getElementById('nova-categoria').value;
+        const valor = parseFloat(document.getElementById('novo-valor').value);
+        const tipo = document.getElementById('novo-tipo').value;
+        const data = document.getElementById('nova-data').value;
+        // Verificar se o valor é válido
+        if (isNaN(valor) || valor <= 0) {
+            mostrarNotificacao('Informe um valor válido maior que zero.', 'erro');
             return;
         }
+        // Processar comprovante se existir
+        let comprovante = null;
+        if (inputComprovante.files[0]) {
+            comprovante = await getBase64(inputComprovante.files[0]);
+        }
+        // Valor efetivo (positivo para receita, negativo para despesa)
+        const valorEfetivo = tipo === 'receita' ? valor : -valor;
+        // Verificar se a despesa ultrapassaria o limite do cheque especial
+        if (valorEfetivo < 0) {
+            const saldoAtual = transacoes.reduce((acc, t) => acc + t.valor, 0);
+            const novoSaldo = saldoAtual + valorEfetivo;
+            if (novoSaldo < -configuracoes.chequeEspecial) {
+                mostrarNotificacao('Transação não permitida: Limite de cheque especial seria excedido!', 'erro');
+                return;
+            }
+        }
+        // Criar nova transação
+        const novaTransacao = {
+            id: Date.now().toString(),
+            descricao,
+            categoria,
+            valor: valorEfetivo,
+            data,
+            comprovante
+        };
+        // Adicionar a transação
+        transacoes.push(novaTransacao);
+        salvarTransacoes();
+        // Atualizar interface
+        atualizarDashboard();
+        renderizarTransacoes();
+        atualizarExtratoBancario();
+        // Fechar o modal e limpar formulário
+        modalTransacao.style.display = 'none';
+        limparFormularios();
+        // Mostrar notificação de sucesso
+        mostrarNotificacao(`${tipo === 'receita' ? 'Receita' : 'Despesa'} adicionada com sucesso!`);
+    } catch (err) {
+        console.error('Erro ao adicionar transação:', err);
+        mostrarNotificacao('Erro inesperado ao adicionar transação. Veja o console para detalhes.', 'erro');
     }
-    
-    // Criar nova transação
-    const novaTransacao = {
-        id: Date.now().toString(),
-        descricao,
-        categoria,
-        valor: valorEfetivo,
-        data,
-        comprovante
-    };
-    
-    // Adicionar a transação
-    transacoes.push(novaTransacao);
-    salvarTransacoes();
-    
-    // Atualizar interface
-    atualizarDashboard();
-    renderizarTransacoes();
-    atualizarExtratoBancario();
-    
-    // Fechar o modal e limpar formulário
-    modalTransacao.style.display = 'none';
-    limparFormularios();
-    
-    // Mostrar notificação de sucesso
-    mostrarNotificacao(`${tipo === 'receita' ? 'Receita' : 'Despesa'} adicionada com sucesso!`);
 });
 
 function getBase64(file) {
@@ -1539,8 +1526,19 @@ function gerarDicasEconomia(transacoes) {
 
 // Função para exportar o relatório em PDF
 function exportarRelatorioPDF() {
-    mostrarNotificacao('Exportação de PDF será implementada em uma atualização futura!', 'info');
-    // Implementar integração com biblioteca de PDF futuramente
+    const relatorio = document.getElementById('relatorio-content');
+    if (!relatorio || relatorio.style.display === 'none') {
+        mostrarNotificacao('Não há relatório gerado para exportar!', 'erro');
+        return;
+    }
+    const opt = {
+        margin:       0.5,
+        filename:     `relatorio_financeiro_${new Date().toISOString().slice(0,10)}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2 },
+        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(relatorio).save();
 }
 
 // Função auxiliar para formatar nome da categoria
@@ -2440,12 +2438,6 @@ function gerarDicas(transacoes, totais) {
     });
 }
 
-function exportarRelatorioPDF() {
-    alert('Exportando relatório como PDF... Funcionalidade a ser implementada.');
-    // Em uma implementação real, você usaria uma biblioteca como jsPDF
-    // para gerar um PDF com os dados do relatório
-}
-
 function gerarCoresAleatorias(quantidade) {
     const cores = [];
     const coresPredefinidas = [
@@ -2474,4 +2466,9 @@ function gerarCoresAleatorias(quantidade) {
     }
     
     return cores;
+}
+
+// Função utilitária para relatórios: retorna todas as transações
+function obterTodasTransacoes() {
+    return transacoes;
 }
