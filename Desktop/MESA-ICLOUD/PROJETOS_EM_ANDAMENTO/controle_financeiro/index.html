@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle Financeiro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Controle Financeiro</h1>
+        
+        <!-- Abas de navegação -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+            <button class="tab-btn" data-tab="transacoes">Transações</button>
+            <button class="tab-btn" data-tab="recorrentes">Recorrentes</button>
+            <button class="tab-btn" data-tab="relatorios">Relatórios</button>
+            <button class="tab-btn" data-tab="configuracoes">Config</button>
+        </div>
+        
+        <!-- Aba Dashboard -->
+        <div class="tab-content active" id="dashboard">
+            <div class="card">
+                <h3>Saldo Atual</h3>
+                <p id="saldo-atual">R$ 0,00</p>
+            </div>
+            
+            <div class="placares-container">
+                <!-- Placar de entradas do mês -->
+                <div class="placar-financeiro placar-entradas">
+                    <div class="placar-header">
+                        <h3>Entradas do Mês</h3>
+                        <div class="placar-icon">
+                            <i class="fas fa-arrow-trend-up"></i>
+                        </div>
+                    </div>
+                    <div class="placar-body">
+                        <div class="placar-valor" id="entradas-mes">R$ 0,00</div>
+                        <div class="placar-info">
+                            <span>Quantidade: <strong id="qtd-entradas">0</strong></span>
+                            <span class="placar-percentual positivo" id="percentual-entradas">
+                                <i class="fas fa-arrow-up"></i> 0%
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Placar de saídas do mês -->
+                <div class="placar-financeiro placar-saidas">
+                    <div class="placar-header">
+                        <h3>Saídas do Mês</h3>
+                        <div class="placar-icon">
+                            <i class="fas fa-arrow-trend-down"></i>
+                        </div>
+                    </div>
+                    <div class="placar-body">
+                        <div class="placar-valor" id="saidas-mes">R$ 0,00</div>
+                        <div class="placar-info">
+                            <span>Quantidade: <strong id="qtd-saidas">0</strong></span>
+                            <span class="placar-percentual negativo" id="percentual-saidas">
+                                <i class="fas fa-arrow-up"></i> 0%
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="cheque-especial">
+                <h3>Cheque Especial: <span id="limite-cheque">R$ 0,00</span></h3>
+                <div class="progress-bar">
+                    <div class="progress" id="progresso-cheque"></div>
+                </div>
+            </div>
+            
+            <h3>Últimas Transações</h3>
+            <ul id="ultimas-transacoes" class="lista-transacoes"></ul>
+            
+            <button class="btn-add" id="btn-nova-transacao">
+                <i class="fas fa-plus"></i> Nova Transação
+            </button>
+        </div>
+        
+        <!-- Aba Transações -->
+        <div class="tab-content" id="transacoes">
+            <div class="extrato-container">
+                <div class="extrato-header">
+                    <h2>Extrato Bancário</h2>
+                    <div class="extrato-periodo">
+                        <span id="extrato-data">Maio/2025</span>
+                    </div>
+                </div>
+                
+                <div class="extrato-controles">
+                    <div class="filtro">
+                        <select id="filtro-tipo">
+                            <option value="todas">Todas</option>
+                            <option value="receitas">Receitas</option>
+                            <option value="despesas">Despesas</option>
+                        </select>
+                        <select id="filtro-mes">
+                            <option value="0">Todos os meses</option>
+                            <option value="1">Janeiro</option>
+                            <option value="2">Fevereiro</option>
+                            <option value="3">Março</option>
+                            <option value="4">Abril</option>
+                            <option value="5" selected>Maio</option>
+                            <option value="6">Junho</option>
+                            <option value="7">Julho</option>
+                            <option value="8">Agosto</option>
+                            <option value="9">Setembro</option>
+                            <option value="10">Outubro</option>
+                            <option value="11">Novembro</option>
+                            <option value="12">Dezembro</option>
+                        </select>
+                        <select id="filtro-ano">
+                            <option value="2024">2024</option>
+                            <option value="2025" selected>2025</option>
+                            <option value="2026">2026</option>
+                        </select>
+                        <button id="btn-debug-transacoes" class="btn" title="Verificar Transações">
+                            <i class="fas fa-bug"></i> Debug
+                        </button>
+                    </div>
+                    <button class="btn" id="btn-imprimir-extrato"><i class="fas fa-print"></i> Imprimir</button>
+                </div>
+                
+                <div class="extrato-resumo">
+                    <div class="resumo-item">
+                        <span class="resumo-label">Saldo anterior</span>
+                        <span class="resumo-valor" id="saldo-anterior">R$ 0,00</span>
+                    </div>
+                    <div class="resumo-item">
+                        <span class="resumo-label">Total de entradas</span>
+                        <span class="resumo-valor positivo" id="total-entradas">R$ 0,00</span>
+                    </div>
+                    <div class="resumo-item">
+                        <span class="resumo-label">Total de saídas</span>
+                        <span class="resumo-valor negativo" id="total-saidas">R$ 0,00</span>
+                    </div>
+                    <div class="resumo-item saldo-final">
+                        <span class="resumo-label">Saldo final</span>
+                        <span class="resumo-valor" id="saldo-final">R$ 0,00</span>
+                    </div>
+                </div>
+                
+                <div class="extrato-table-container">
+                    <table class="extrato-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Descrição</th>
+                                <th>Categoria</th>
+                                <th>Valor</th>
+                                <th>Saldo</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="extrato-transacoes">
+                            <!-- Transações serão inseridas aqui via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="extrato-empty" id="extrato-empty">
+                    <i class="fas fa-receipt"></i>
+                    <p>Nenhuma transação encontrada para o período selecionado</p>
+                </div>
+            </div>
+            
+            <div class="extrato-actions">
+                <button class="btn-add" id="btn-nova-transacao-extrato">
+                    <i class="fas fa-plus"></i> Nova Transação
+                </button>
+            </div>
+        </div>
+        
+        <!-- Aba Contas Recorrentes -->
+        <div class="tab-content" id="recorrentes">
+            <div class="recorrentes-header">
+                <h3>Contas Recorrentes</h3>
+                <button class="btn-add" id="btn-nova-recorrente">
+                    <i class="fas fa-plus"></i> Nova Recorrente
+                </button>
+            </div>
+            
+            <ul id="lista-recorrentes" class="lista-recorrentes"></ul>
+        </div>
+        
+        <!-- Aba Relatórios -->
+        <div class="tab-content" id="relatorios">
+            <div class="relatorio-periodo">
+                <h3>Relatório Mensal</h3>
+                <select id="relatorio-mes">
+                    <option value="1">Janeiro</option>
+                    <option value="2">Fevereiro</option>
+                    <option value="3">Março</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Maio</option>
+                    <option value="6">Junho</option>
+                    <option value="7">Julho</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Setembro</option>
+                    <option value="10">Outubro</option>
+                    <option value="11">Novembro</option>
+                    <option value="12">Dezembro</option>
+                </select>
+                <select id="relatorio-ano">
+                    <option value="2024">2024</option>
+                    <option value="2025" selected>2025</option>
+                    <option value="2026">2026</option>
+                </select>
+                <button id="btn-gerar-relatorio" class="btn">Gerar</button>
+            </div>
+            
+            <div class="grafico-container">
+                <canvas id="grafico-mensal"></canvas>
+            </div>
+            
+            <div class="resumo-relatorio">
+                <div class="card">
+                    <h4>Total de Receitas</h4>
+                    <p id="relatorio-receitas">R$ 0,00</p>
+                </div>
+                <div class="card">
+                    <h4>Total de Despesas</h4>
+                    <p id="relatorio-despesas">R$ 0,00</p>
+                </div>
+                <div class="card">
+                    <h4>Saldo do Período</h4>
+                    <p id="relatorio-saldo">R$ 0,00</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Aba Configurações -->
+        <div class="tab-content" id="configuracoes">
+            <h3>Informações Básicas</h3>
+            <form id="form-config">
+                <div class="config-item">
+                    <label for="saldo-inicial">Saldo Inicial:</label>
+                    <input type="number" id="saldo-inicial" placeholder="Informe seu saldo inicial">
+                </div>
+                <div class="config-item">
+                    <label for="cheque-especial">Limite de Cheque Especial:</label>
+                    <input type="number" id="cheque-especial" placeholder="Informe o limite do cheque especial">
+                </div>
+                <button type="submit" class="btn">Salvar</button>
+            </form>
+            
+            <div class="data-actions">
+                <h3>Ações de Dados</h3>
+                <button id="btn-exportar" class="btn">Exportar Dados</button>
+                <button id="btn-importar" class="btn">Importar Dados</button>
+                <input type="file" id="import-file" accept=".json" style="display: none;">
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Nova Transação -->
+    <div class="modal" id="modal-transacao">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Nova Transação</h2>
+            <form id="form-nova-transacao">
+                <div class="form-group">
+                    <label for="nova-descricao">Descrição:</label>
+                    <input type="text" id="nova-descricao" required>
+                </div>
+                <div class="form-group">
+                    <label for="nova-categoria">Categoria:</label>
+                    <select id="nova-categoria">
+                        <option value="salario">Salário</option>
+                        <option value="alimentacao">Alimentação</option>
+                        <option value="transporte">Transporte</option>
+                        <option value="lazer">Lazer</option>
+                        <option value="saude">Saúde</option>
+                        <option value="educacao">Educação</option>
+                        <option value="moradia">Moradia</option>
+                        <option value="outros">Outros</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="novo-valor">Valor:</label>
+                    <input type="number" id="novo-valor" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="novo-tipo">Tipo:</label>
+                    <select id="novo-tipo">
+                        <option value="receita">Receita</option>
+                        <option value="despesa">Despesa</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="nova-data">Data:</label>
+                    <input type="date" id="nova-data" required>
+                </div>
+                <div class="form-group">
+                    <label for="novo-comprovante">Comprovante/Boleto (opcional):</label>
+                    <input type="file" id="novo-comprovante" accept="image/*,application/pdf">
+                    <div id="preview-comprovante" class="preview-imagem"></div>
+                </div>
+                <button type="submit" class="btn btn-primary">Adicionar</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal Nova Recorrente -->
+    <div class="modal" id="modal-recorrente">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Nova Conta Recorrente</h2>
+            <form id="form-nova-recorrente">
+                <div class="form-group">
+                    <label for="recorrente-descricao">Descrição:</label>
+                    <input type="text" id="recorrente-descricao" required>
+                </div>
+                <div class="form-group">
+                    <label for="recorrente-categoria">Categoria:</label>
+                    <select id="recorrente-categoria">
+                        <option value="salario">Salário</option>
+                        <option value="alimentacao">Alimentação</option>
+                        <option value="transporte">Transporte</option>
+                        <option value="lazer">Lazer</option>
+                        <option value="saude">Saúde</option>
+                        <option value="educacao">Educação</option>
+                        <option value="moradia">Moradia</option>
+                        <option value="outros">Outros</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="recorrente-valor">Valor:</label>
+                    <input type="number" id="recorrente-valor" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="recorrente-tipo">Tipo:</label>
+                    <select id="recorrente-tipo">
+                        <option value="receita">Receita</option>
+                        <option value="despesa">Despesa</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="recorrente-dia">Dia do mês:</label>
+                    <input type="number" id="recorrente-dia" min="1" max="31" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Adicionar</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal Editar Transação -->
+    <div class="modal" id="modal-editar-transacao">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Editar Transação</h2>
+            <form id="form-editar-transacao">
+                <input type="hidden" id="editar-id">
+                <div class="form-group">
+                    <label for="editar-descricao">Descrição:</label>
+                    <input type="text" id="editar-descricao" required>
+                </div>
+                <div class="form-group">
+                    <label for="editar-categoria">Categoria:</label>
+                    <select id="editar-categoria">
+                        <option value="salario">Salário</option>
+                        <option value="alimentacao">Alimentação</option>
+                        <option value="transporte">Transporte</option>
+                        <option value="lazer">Lazer</option>
+                        <option value="saude">Saúde</option>
+                        <option value="educacao">Educação</option>
+                        <option value="moradia">Moradia</option>
+                        <option value="outros">Outros</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editar-valor">Valor:</label>
+                    <input type="number" id="editar-valor" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="editar-tipo">Tipo:</label>
+                    <select id="editar-tipo">
+                        <option value="receita">Receita</option>
+                        <option value="despesa">Despesa</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editar-data">Data:</label>
+                    <input type="date" id="editar-data" required>
+                </div>
+                <div class="form-group">
+                    <label for="editar-comprovante">Comprovante/Boleto (opcional):</label>
+                    <input type="file" id="editar-comprovante" accept="image/*,application/pdf">
+                    <div id="editar-preview-comprovante" class="preview-imagem"></div>
+                    <div id="comprovante-atual" class="comprovante-atual"></div>
+                </div>
+                <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+            </form>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
