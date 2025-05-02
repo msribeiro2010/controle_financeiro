@@ -117,10 +117,10 @@ function inicializarLogin() {
     // Adicionar funcionalidade de logout
     btnLogout.addEventListener('click', () => {
         localStorage.removeItem('isLoggedIn');
-        mainContent.style.display = 'none';
-        loginScreen.style.display = 'flex';
-        loginForm.reset();
-        loginError.textContent = '';
+        document.getElementById('main-content').style.display = 'none';
+        document.getElementById('login-screen').style.display = 'flex';
+        document.getElementById('login-form').reset();
+        document.getElementById('login-error').textContent = '';
     });
 }
 
@@ -1863,51 +1863,44 @@ function exportarDados() {
         contasRecorrentes,
         configuracoes
     };
-    
+    const now = new Date();
+    const dataStr = now.toISOString().replace(/[:T]/g, '-').slice(0, 16);
     const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-    
     const a = document.createElement('a');
     a.href = url;
-    a.download = `controle_financeiro_${new Date().toISOString().slice(0,10)}.json`;
+    a.download = `controle_financeiro_backup_${dataStr}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+    mostrarNotificacao('Backup exportado com sucesso!', 'sucesso');
 }
 
 function importarDados(e) {
     const file = e.target.files[0];
     if (!file) return;
-    
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
             const dados = JSON.parse(e.target.result);
-            
-            if (dados.transacoes) {
-                transacoes = dados.transacoes;
-                salvarTransacoes();
+            if (!dados.transacoes || !dados.contasRecorrentes || !dados.configuracoes) {
+                mostrarNotificacao('Arquivo inválido: formato não reconhecido.', 'erro');
+                return;
             }
-            
-            if (dados.contasRecorrentes) {
-                contasRecorrentes = dados.contasRecorrentes;
-                salvarContasRecorrentes();
-            }
-            
-            if (dados.configuracoes) {
-                configuracoes = dados.configuracoes;
-                salvarConfiguracoes();
-                carregarConfiguracoes();
-            }
-            
+            transacoes = dados.transacoes;
+            salvarTransacoes();
+            contasRecorrentes = dados.contasRecorrentes;
+            salvarContasRecorrentes();
+            configuracoes = dados.configuracoes;
+            salvarConfiguracoes();
+            carregarConfiguracoes();
             atualizarDashboard();
             renderizarTransacoes();
             renderizarContasRecorrentes();
             atualizarExtratoBancario();
-            
-            alert('Dados importados com sucesso!');
+            mostrarNotificacao('Dados importados com sucesso!', 'sucesso');
         } catch (error) {
-            alert('Erro ao importar dados. Verifique o formato do arquivo.');
+            mostrarNotificacao('Erro ao importar dados. Verifique o formato do arquivo.', 'erro');
             console.error(error);
         }
     };
