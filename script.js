@@ -78,6 +78,31 @@ const dicasContainer = document.getElementById('dicas-container');
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
+    // Verificar elementos críticos antes de prosseguir
+    const elementosCriticos = {
+        formNovaTransacao,
+        formConfig,
+        saldoAtual,
+        entradasMes,
+        saidasMes,
+        limiteChequeTxt,
+        progressoCheque,
+        filtroTipo,
+        filtroMes,
+        inputSaldoInicial,
+        inputChequeEspecial
+    };
+    
+    const elementosFaltando = Object.entries(elementosCriticos)
+        .filter(([_, element]) => !element)
+        .map(([name]) => name);
+    
+    if (elementosFaltando.length > 0) {
+        console.error('Elementos críticos não encontrados:', elementosFaltando);
+        mostrarNotificacao('Erro ao carregar alguns elementos da página. Por favor, recarregue.', 'erro');
+        return;
+    }
+    
     carregarConfiguracoes();
     criarTransacaoSaldoInicial();
     atualizarDashboard();
@@ -86,15 +111,16 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Definir mês atual nos seletores
     const dataAtual = new Date();
-    filtroMes.value = dataAtual.getMonth() + 1;
-    relatorioMes.value = dataAtual.getMonth() + 1;
+    if (filtroMes) filtroMes.value = dataAtual.getMonth() + 1;
+    if (relatorioMes) relatorioMes.value = dataAtual.getMonth() + 1;
     
     // Adicionar data atual ao campo de data
-    document.getElementById('nova-data').valueAsDate = new Date();
-
+    const novaData = document.getElementById('nova-data');
+    if (novaData) novaData.valueAsDate = new Date();
+    
     // Definir data atual no extrato e filtro
-    extratoData.textContent = `${obterNomeMes(dataAtual.getMonth() + 1)}/${dataAtual.getFullYear()}`;
-    filtroAno.value = dataAtual.getFullYear();
+    if (extratoData) extratoData.textContent = `${obterNomeMes(dataAtual.getMonth() + 1)}/${dataAtual.getFullYear()}`;
+    if (filtroAno) filtroAno.value = dataAtual.getFullYear();
     
     // Atualizar o extrato bancário
     atualizarExtratoBancario();
@@ -112,70 +138,149 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Garantir que a aba de Transações seja carregada corretamente
-    // Certificar-se que o filtro está configurado para mostrar o mês atual
     const currentTab = document.querySelector('.tab-btn.active');
     if (currentTab && currentTab.getAttribute('data-tab') === 'transacoes') {
         console.log('Aba de transações já está ativa, atualizando...');
-        const dataAtual = new Date();
-        filtroMes.value = dataAtual.getMonth() + 1;
-        filtroAno.value = dataAtual.getFullYear();
+        if (filtroMes) filtroMes.value = dataAtual.getMonth() + 1;
+        if (filtroAno) filtroAno.value = dataAtual.getFullYear();
         atualizarExtratoBancario();
     }
     
     // Força a atualização para garantir que o filtro de data seja respeitado
     renderizarTransacoes();
-
+    
     // Inicializar relatório
     inicializarRelatorio();
 });
 
 // Sistema de navegação por abas
-tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-        const tabId = tab.getAttribute('data-tab');
-        
-        tabs.forEach(t => t.classList.remove('active'));
-        tabContents.forEach(content => content.classList.remove('active'));
-        
-        tab.classList.add('active');
-        document.getElementById(tabId).classList.add('active');
-        
-        // Se a aba de transações estiver sendo ativada, atualizar o extrato
-        if (tabId === 'transacoes') {
-            console.log('Aba de transações ativada, atualizando extrato...');
-            atualizarExtratoBancario();
-        }
+function inicializarNavegacao() {
+    const tabs = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    if (!tabs || tabs.length === 0) {
+        console.error('Erro: Botões de navegação não encontrados');
+        mostrarNotificacao('Erro ao carregar a navegação. Por favor, recarregue a página.', 'erro');
+        return;
+    }
+    
+    if (!tabContents || tabContents.length === 0) {
+        console.error('Erro: Conteúdo das abas não encontrado');
+        mostrarNotificacao('Erro ao carregar o conteúdo. Por favor, recarregue a página.', 'erro');
+        return;
+    }
+    
+    tabs.forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            try {
+                e.preventDefault();
+                const tabId = tab.getAttribute('data-tab');
+                
+                if (!tabId) {
+                    console.error('Erro: ID da aba não encontrado');
+                    return;
+                }
+                
+                const targetTab = document.getElementById(tabId);
+                if (!targetTab) {
+                    console.error(`Erro: Conteúdo da aba #${tabId} não encontrado`);
+                    return;
+                }
+                
+                // Remover classe ativa de todas as abas
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                
+                // Adicionar classe ativa à aba selecionada
+                tab.classList.add('active');
+                targetTab.classList.add('active');
+                
+                // Atualizar conteúdo específico da aba
+                if (tabId === 'transacoes') {
+                    console.log('Atualizando extrato bancário...');
+                    setTimeout(() => {
+                        try {
+                            atualizarExtratoBancario();
+                        } catch (err) {
+                            console.error('Erro ao atualizar extrato:', err);
+                            mostrarNotificacao('Erro ao atualizar o extrato bancário', 'erro');
+                        }
+                    }, 0);
+                } else if (tabId === 'relatorios') {
+                    console.log('Atualizando relatórios...');
+                    setTimeout(() => {
+                        try {
+                            gerarRelatorio();
+                        } catch (err) {
+                            console.error('Erro ao gerar relatório:', err);
+                            mostrarNotificacao('Erro ao gerar o relatório', 'erro');
+                        }
+                    }, 0);
+                }
+            } catch (err) {
+                console.error('Erro ao mudar de aba:', err);
+                mostrarNotificacao('Erro ao mudar de aba. Por favor, tente novamente.', 'erro');
+            }
+        });
     });
+    
+    // Garantir que a primeira aba esteja ativa
+    const activeTab = document.querySelector('.tab-btn.active');
+    if (!activeTab && tabs.length > 0) {
+        tabs[0].click();
+    }
+}
+
+// Inicializar navegação quando o DOM estiver pronto
+document.addEventListener('DOMContentLoaded', () => {
+    try {
+        inicializarNavegacao();
+    } catch (err) {
+        console.error('Erro ao inicializar navegação:', err);
+        mostrarNotificacao('Erro ao inicializar a navegação. Por favor, recarregue a página.', 'erro');
+    }
 });
 
 // Funções para Modal
-btnNovaTransacao.addEventListener('click', () => {
-    modalTransacao.style.display = 'block';
-});
+if (btnNovaTransacao && modalTransacao) {
+    btnNovaTransacao.addEventListener('click', () => {
+        modalTransacao.style.display = 'block';
+    });
+}
 
-btnNovaRecorrente.addEventListener('click', () => {
-    modalRecorrente.style.display = 'block';
-});
+if (btnNovaRecorrente && modalRecorrente) {
+    btnNovaRecorrente.addEventListener('click', () => {
+        modalRecorrente.style.display = 'block';
+    });
+}
 
-btnNovaTransacaoExtrato.addEventListener('click', () => {
-    modalTransacao.style.display = 'block';
-});
+if (btnNovaTransacaoExtrato && modalTransacao) {
+    btnNovaTransacaoExtrato.addEventListener('click', () => {
+        modalTransacao.style.display = 'block';
+    });
+}
 
 // Adicionar evento de submissão ao formulário de edição
-formEditarTransacao.addEventListener('submit', (e) => {
-    e.preventDefault();
-    salvarTransacaoEditada();
-});
-
-closeBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-        modalTransacao.style.display = 'none';
-        modalRecorrente.style.display = 'none';
-        modalEditarTransacao.style.display = 'none';
-        limparFormularios();
+if (formEditarTransacao) {
+    formEditarTransacao.addEventListener('submit', (e) => {
+        e.preventDefault();
+        salvarTransacaoEditada();
     });
-});
+}
 
+// Botões de fechar modais
+if (closeBtns && closeBtns.length > 0) {
+    closeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (modalTransacao) modalTransacao.style.display = 'none';
+            if (modalRecorrente) modalRecorrente.style.display = 'none';
+            if (modalEditarTransacao) modalEditarTransacao.style.display = 'none';
+            limparFormularios();
+        });
+    });
+}
+
+// Fechar modais ao clicar fora
 window.addEventListener('click', (e) => {
     if (e.target === modalTransacao) {
         modalTransacao.style.display = 'none';
@@ -224,23 +329,41 @@ extratoBtnImprimir.addEventListener('click', imprimirExtrato);
 formNovaTransacao.addEventListener('submit', async (e) => {
     e.preventDefault();
     try {
-        const descricao = document.getElementById('nova-descricao').value;
-        const categoria = document.getElementById('nova-categoria').value;
-        const valor = parseFloat(document.getElementById('novo-valor').value);
-        const tipo = document.getElementById('novo-tipo').value;
-        const data = document.getElementById('nova-data').value;
+        // Obter elementos do formulário
+        const descricaoEl = document.getElementById('nova-descricao');
+        const categoriaEl = document.getElementById('nova-categoria');
+        const valorEl = document.getElementById('novo-valor');
+        const tipoEl = document.getElementById('novo-tipo');
+        const dataEl = document.getElementById('nova-data');
+        
+        // Verificar se todos os elementos existem
+        if (!descricaoEl || !categoriaEl || !valorEl || !tipoEl || !dataEl) {
+            mostrarNotificacao('Erro: Elementos do formulário não encontrados.', 'erro');
+            return;
+        }
+        
+        // Obter valores dos elementos
+        const descricao = descricaoEl.value;
+        const categoria = categoriaEl.value;
+        const valor = parseFloat(valorEl.value);
+        const tipo = tipoEl.value;
+        const data = dataEl.value;
+        
         // Verificar se o valor é válido
         if (isNaN(valor) || valor <= 0) {
             mostrarNotificacao('Informe um valor válido maior que zero.', 'erro');
             return;
         }
+        
         // Processar comprovante se existir
         let comprovante = null;
-        if (inputComprovante.files[0]) {
+        if (inputComprovante && inputComprovante.files && inputComprovante.files[0]) {
             comprovante = await getBase64(inputComprovante.files[0]);
         }
+        
         // Valor efetivo (positivo para receita, negativo para despesa)
         const valorEfetivo = tipo === 'receita' ? valor : -valor;
+        
         // Verificar se a despesa ultrapassaria o limite do cheque especial
         if (valorEfetivo < 0) {
             const saldoAtual = transacoes.reduce((acc, t) => acc + t.valor, 0);
@@ -250,6 +373,7 @@ formNovaTransacao.addEventListener('submit', async (e) => {
                 return;
             }
         }
+        
         // Criar nova transação
         const novaTransacao = {
             id: Date.now().toString(),
@@ -259,16 +383,22 @@ formNovaTransacao.addEventListener('submit', async (e) => {
             data,
             comprovante
         };
+        
         // Adicionar a transação
         transacoes.push(novaTransacao);
         salvarTransacoes();
+        
         // Atualizar interface
         atualizarDashboard();
         renderizarTransacoes();
         atualizarExtratoBancario();
+        
         // Fechar o modal e limpar formulário
-        modalTransacao.style.display = 'none';
+        if (modalTransacao) {
+            modalTransacao.style.display = 'none';
+        }
         limparFormularios();
+        
         // Mostrar notificação de sucesso
         mostrarNotificacao(`${tipo === 'receita' ? 'Receita' : 'Despesa'} adicionada com sucesso!`);
     } catch (err) {
@@ -456,6 +586,12 @@ function confirmarExclusao(id) {
 }
 
 function renderizarTransacoes() {
+    // Verificar se os elementos necessários existem
+    if (!filtroTipo || !filtroMes) {
+        console.error('Elementos de filtro não encontrados');
+        return;
+    }
+    
     // Filtrar transações
     let transacoesFiltradas = [...transacoes];
     
@@ -468,7 +604,7 @@ function renderizarTransacoes() {
         transacoesFiltradas = transacoesFiltradas.filter(t => t.valor < 0);
     }
     
-    if (filtroMes.value !== 'todos') {
+    if (filtroMes.value !== '0') { // Alterado para '0' que é o valor para "Todos os meses"
         const mes = parseInt(filtroMes.value);
         transacoesFiltradas = transacoesFiltradas.filter(t => {
             const data = new Date(t.data);
@@ -479,23 +615,66 @@ function renderizarTransacoes() {
     // Ordenar por data (mais recente primeiro)
     transacoesFiltradas.sort((a, b) => new Date(b.data) - new Date(a.data));
     
-    // Renderizar na lista completa de transações
-    listaTransacoes.innerHTML = '';
-    transacoesFiltradas.forEach(transacao => {
-        const li = criarElementoTransacao(transacao);
-        listaTransacoes.appendChild(li);
-    });
+    // Renderizar no extrato de transações
+    const extratoTransacoes = document.getElementById('extrato-transacoes');
+    if (extratoTransacoes) {
+        extratoTransacoes.innerHTML = '';
+        let saldoAcumulado = 0;
+        
+        transacoesFiltradas.forEach(transacao => {
+            const tr = document.createElement('tr');
+            const data = new Date(transacao.data);
+            saldoAcumulado += transacao.valor;
+            
+            tr.innerHTML = `
+                <td>${data.toLocaleDateString('pt-BR')}</td>
+                <td>${transacao.descricao}</td>
+                <td>${formatarCategoria(transacao.categoria)}</td>
+                <td class="${transacao.valor >= 0 ? 'positivo' : 'negativo'}">
+                    ${transacao.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                </td>
+                <td class="${saldoAcumulado >= 0 ? 'positivo' : 'negativo'}">
+                    ${saldoAcumulado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                </td>
+                <td>
+                    ${transacao.categoria !== 'sistema' ? `
+                        <button class="btn-acao edit" onclick="editarTransacao('${transacao.id}')">
+                            <i class="fas fa-pencil-alt"></i>
+                        </button>
+                    ` : ''}
+                    <button class="btn-acao delete" onclick="confirmarExclusao('${transacao.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    ${transacao.comprovante ? `
+                        <button class="btn-acao view" onclick="visualizarComprovante(${JSON.stringify(transacao).replace(/"/g, '&quot;')})">
+                            <i class="fas fa-file"></i>
+                        </button>
+                    ` : ''}
+                </td>
+            `;
+            extratoTransacoes.appendChild(tr);
+        });
+        
+        // Mostrar ou esconder mensagem de "nenhuma transação"
+        const extratoEmpty = document.getElementById('extrato-empty');
+        if (extratoEmpty) {
+            extratoEmpty.style.display = transacoesFiltradas.length === 0 ? 'flex' : 'none';
+        }
+    }
     
     // Renderizar nas últimas transações do dashboard (5 mais recentes)
-    ultimasTransacoes.innerHTML = '';
-    transacoes
-        .filter(t => !(t.categoria === 'sistema' && t.descricao === '[Saldo Inicial]')) // Não mostrar transação de saldo inicial
-        .sort((a, b) => new Date(b.data) - new Date(a.data))
-        .slice(0, 5)
-        .forEach(transacao => {
-            const li = criarElementoTransacao(transacao);
-            ultimasTransacoes.appendChild(li);
-        });
+    const ultimasTransacoes = document.getElementById('ultimas-transacoes');
+    if (ultimasTransacoes) {
+        ultimasTransacoes.innerHTML = '';
+        transacoes
+            .filter(t => !(t.categoria === 'sistema' && t.descricao === '[Saldo Inicial]')) // Não mostrar transação de saldo inicial
+            .sort((a, b) => new Date(b.data) - new Date(a.data))
+            .slice(0, 5)
+            .forEach(transacao => {
+                const li = criarElementoTransacao(transacao);
+                ultimasTransacoes.appendChild(li);
+            });
+    }
 }
 
 function criarElementoTransacao(transacao) {
@@ -814,90 +993,122 @@ function gerarTransacaoDeRecorrente(id) {
 
 // Funções específicas para o saldo inicial
 function criarTransacaoSaldoInicial() {
-    // Verifica se já existe uma transação de saldo inicial
-    const saldoInicialExistente = transacoes.find(t => t.descricao === '[Saldo Inicial]' && t.categoria === 'sistema');
-    
-    // Se não existir e o valor for maior que 0, cria a transação
-    if (!saldoInicialExistente && configuracoes.saldoInicial > 0) {
-        const dataInicial = new Date(2025, 0, 1); // 1º de janeiro de 2025
+    try {
+        // Verificar se já existe uma transação de saldo inicial
+        const saldoInicialExistente = transacoes.find(t => 
+            t.categoria === 'sistema' && t.descricao === '[Saldo Inicial]');
         
-        adicionarTransacaoSilenciosa({
-            id: 'saldo-inicial',
-            descricao: '[Saldo Inicial]',
-            categoria: 'sistema',
-            valor: configuracoes.saldoInicial,
-            data: dataInicial.toISOString().split('T')[0],
-            comprovante: null
-        });
-    } 
-    // Se existir mas o valor está diferente, atualiza
-    else if (saldoInicialExistente && saldoInicialExistente.valor !== configuracoes.saldoInicial) {
-        removerTransacao('saldo-inicial', true);
+        // Se existir, remover a transação antiga
+        if (saldoInicialExistente) {
+            transacoes = transacoes.filter(t => 
+                !(t.categoria === 'sistema' && t.descricao === '[Saldo Inicial]'));
+        }
         
-        // Se o novo valor for > 0, cria a transação novamente
-        if (configuracoes.saldoInicial > 0) {
+        // Criar nova transação de saldo inicial se o valor for diferente de 0
+        if (configuracoes.saldoInicial !== 0) {
             const dataInicial = new Date(2025, 0, 1); // 1º de janeiro de 2025
             
-            adicionarTransacaoSilenciosa({
+            const novaTransacaoSaldoInicial = {
                 id: 'saldo-inicial',
                 descricao: '[Saldo Inicial]',
                 categoria: 'sistema',
                 valor: configuracoes.saldoInicial,
                 data: dataInicial.toISOString().split('T')[0],
                 comprovante: null
-            });
+            };
+            
+            // Adicionar no início do array para manter consistência no extrato
+            transacoes.unshift(novaTransacaoSaldoInicial);
         }
+        
+        // Salvar alterações
+        salvarTransacoes();
+        
+        console.log('Saldo inicial atualizado:', configuracoes.saldoInicial);
+        
+    } catch (error) {
+        console.error('Erro ao criar transação de saldo inicial:', error);
+        mostrarNotificacao('Erro ao atualizar saldo inicial', 'erro');
     }
 }
 
 // Configurações
-formConfig.addEventListener('submit', (e) => {
+formConfig.addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    const novoSaldoInicial = parseFloat(inputSaldoInicial.value) || 0;
-    configuracoes.saldoInicial = novoSaldoInicial;
-    configuracoes.chequeEspecial = parseFloat(inputChequeEspecial.value) || 0;
-    
-    salvarConfiguracoes();
-    criarTransacaoSaldoInicial();
-    atualizarDashboard();
-    renderizarTransacoes();
-    
-    // Mostrar feedback visual
-    mostrarNotificacao('Configurações salvas com sucesso!');
+    try {
+        const novoSaldoInicial = parseFloat(inputSaldoInicial.value) || 0;
+        const novoChequeEspecial = parseFloat(inputChequeEspecial.value) || 0;
+        
+        // Atualizar configurações
+        configuracoes.saldoInicial = novoSaldoInicial;
+        configuracoes.chequeEspecial = novoChequeEspecial;
+        
+        // Salvar configurações
+        salvarConfiguracoes();
+        
+        // Atualizar transação de saldo inicial
+        await criarTransacaoSaldoInicial();
+        
+        // Atualizar interface
+        atualizarDashboard();
+        renderizarTransacoes();
+        atualizarExtratoBancario();
+        
+        mostrarNotificacao('Configurações salvas com sucesso!');
+        
+    } catch (error) {
+        console.error('Erro ao salvar configurações:', error);
+        mostrarNotificacao('Erro ao salvar configurações', 'erro');
+    }
 });
 
 function carregarConfiguracoes() {
+    // Verificar se os elementos necessários existem
+    if (!inputSaldoInicial || !inputChequeEspecial) {
+        console.error('Elementos de configuração não encontrados');
+        return;
+    }
+    
     // Garantir que recuperou corretamente os valores
     const configSalvas = JSON.parse(localStorage.getItem('configuracoes')) || { saldoInicial: 0, chequeEspecial: 0 };
     configuracoes = configSalvas;
     
     // Compatibilidade com versão anterior que usava "salario" ao invés de "saldoInicial"
     if (configuracoes.salario !== undefined && configuracoes.saldoInicial === undefined) {
-        configuracoes.saldoInicial = configuracoes.salario;
+        configuracoes.saldoInicial = parseFloat(configuracoes.salario) || 0;
         delete configuracoes.salario;
         salvarConfiguracoes();
     }
     
+    // Garantir que os valores são números
+    configuracoes.saldoInicial = parseFloat(configuracoes.saldoInicial) || 0;
+    configuracoes.chequeEspecial = parseFloat(configuracoes.chequeEspecial) || 0;
+    
     // Preencher os campos com os valores reais do localStorage
-    inputSaldoInicial.value = configuracoes.saldoInicial || '';
-    inputChequeEspecial.value = configuracoes.chequeEspecial || '';
+    inputSaldoInicial.value = configuracoes.saldoInicial;
+    inputChequeEspecial.value = configuracoes.chequeEspecial;
+    
+    // Salvar as configurações normalizadas
+    salvarConfiguracoes();
     
     console.log('Configurações carregadas:', configuracoes);
 }
 
 // Dashboard
 function atualizarDashboard() {
-    // Calcula saldo atual
-    const saldo = transacoes.reduce((acc, t) => acc + t.valor, 0);
+    // Verificar se os elementos necessários existem
+    if (!saldoAtual || !entradasMes || !saidasMes || !limiteChequeTxt || !progressoCheque) {
+        console.error('Elementos do dashboard não encontrados');
+        return;
+    }
+    
+    // Calcula saldo atual (incluindo saldo inicial)
+    const saldo = calcularSaldoTotal(true);
     
     // Atualiza saldo e aplica cor baseada no valor
     saldoAtual.textContent = saldo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    if (saldo < 0) {
-        saldoAtual.style.color = '#ef4444'; // Vermelho
-    } else {
-        saldoAtual.style.color = '#10b981'; // Verde
-    }
+    saldoAtual.style.color = saldo < 0 ? '#ef4444' : '#10b981';
     
     // Calcula receitas e despesas do mês atual
     const dataAtual = new Date();
@@ -906,7 +1117,7 @@ function atualizarDashboard() {
     
     const transacoesMes = transacoes.filter(t => {
         // Ignorar transação de saldo inicial nos totais mensais
-        if (t.descricao === '[Saldo Inicial]' && t.categoria === 'sistema') {
+        if (t.categoria === 'sistema' && t.descricao === '[Saldo Inicial]') {
             return false;
         }
         
@@ -920,7 +1131,7 @@ function atualizarDashboard() {
     
     const transacoesMesAnterior = transacoes.filter(t => {
         // Ignorar transação de saldo inicial
-        if (t.descricao === '[Saldo Inicial]' && t.categoria === 'sistema') {
+        if (t.categoria === 'sistema' && t.descricao === '[Saldo Inicial]') {
             return false;
         }
         
@@ -973,26 +1184,30 @@ function atualizarDashboard() {
     saidasMes.textContent = totalDespesas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     
     // Atualizar quantidades
-    document.getElementById('qtd-entradas').textContent = qtdEntradas;
-    document.getElementById('qtd-saidas').textContent = qtdSaidas;
+    const qtdEntradasEl = document.getElementById('qtd-entradas');
+    const qtdSaidasEl = document.getElementById('qtd-saidas');
+    if (qtdEntradasEl) qtdEntradasEl.textContent = qtdEntradas;
+    if (qtdSaidasEl) qtdSaidasEl.textContent = qtdSaidas;
     
     // Atualizar percentuais
     const percentualEntradasEl = document.getElementById('percentual-entradas');
     const percentualSaidasEl = document.getElementById('percentual-saidas');
     
-    // Entradas - diferença percentual em relação ao mês anterior
-    percentualEntradasEl.innerHTML = `
-        <i class="fas fa-arrow-${entradasCrescimento ? 'up' : 'down'}"></i> 
-        ${Math.abs(percentualEntradas)}%
-    `;
-    percentualEntradasEl.className = `placar-percentual ${entradasCrescimento ? 'positivo' : 'negativo'}`;
+    if (percentualEntradasEl) {
+        percentualEntradasEl.innerHTML = `
+            <i class="fas fa-arrow-${entradasCrescimento ? 'up' : 'down'}"></i> 
+            ${Math.abs(percentualEntradas)}%
+        `;
+        percentualEntradasEl.className = `placar-percentual ${entradasCrescimento ? 'positivo' : 'negativo'}`;
+    }
     
-    // Saídas - diferença percentual em relação ao mês anterior
-    percentualSaidasEl.innerHTML = `
-        <i class="fas fa-arrow-${saidasCrescimento ? 'down' : 'up'}"></i> 
-        ${Math.abs(percentualSaidas)}%
-    `;
-    percentualSaidasEl.className = `placar-percentual ${saidasCrescimento ? 'positivo' : 'negativo'}`;
+    if (percentualSaidasEl) {
+        percentualSaidasEl.innerHTML = `
+            <i class="fas fa-arrow-${saidasCrescimento ? 'down' : 'up'}"></i> 
+            ${Math.abs(percentualSaidas)}%
+        `;
+        percentualSaidasEl.className = `placar-percentual ${saidasCrescimento ? 'positivo' : 'negativo'}`;
+    }
     
     // Calcular limite de cheque especial disponível
     let limiteDisponivel = configuracoes.chequeEspecial;
@@ -1641,12 +1856,27 @@ function importarDados(e) {
 
 // Funções de Utilidade
 function limparFormularios() {
-    formNovaTransacao.reset();
-    formNovaRecorrente.reset();
-    formEditarTransacao.reset();
-    previewComprovante.innerHTML = '';
-    editarPreviewComprovante.innerHTML = '';
-    comprovanteAtual.innerHTML = '';
+    // Limpar formulários se existirem
+    if (formNovaTransacao) {
+        formNovaTransacao.reset();
+    }
+    if (formNovaRecorrente) {
+        formNovaRecorrente.reset();
+    }
+    if (formEditarTransacao) {
+        formEditarTransacao.reset();
+    }
+    
+    // Limpar previews se existirem
+    if (previewComprovante) {
+        previewComprovante.innerHTML = '';
+    }
+    if (editarPreviewComprovante) {
+        editarPreviewComprovante.innerHTML = '';
+    }
+    if (comprovanteAtual) {
+        comprovanteAtual.innerHTML = '';
+    }
 }
 
 function salvarTransacoes() {
@@ -2471,4 +2701,11 @@ function gerarCoresAleatorias(quantidade) {
 // Função utilitária para relatórios: retorna todas as transações
 function obterTodasTransacoes() {
     return transacoes;
+}
+
+// Função para calcular saldo total
+function calcularSaldoTotal(incluirSaldoInicial = true) {
+    return transacoes
+        .filter(t => incluirSaldoInicial || !(t.categoria === 'sistema' && t.descricao === '[Saldo Inicial]'))
+        .reduce((acc, t) => acc + t.valor, 0);
 }
