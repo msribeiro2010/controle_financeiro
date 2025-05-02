@@ -8,8 +8,46 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Controle Financeiro</h1>
+    <!-- Tela de Login -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-container">
+            <div class="login-header">
+                <i class="fas fa-wallet"></i>
+                <h1>Controle Financeiro</h1>
+            </div>
+            <form id="login-form" class="login-form">
+                <div class="form-group">
+                    <label for="username">
+                        <i class="fas fa-user"></i>
+                        Usuário:
+                    </label>
+                    <input type="text" id="username" required placeholder="Digite seu usuário">
+                </div>
+                <div class="form-group">
+                    <label for="password">
+                        <i class="fas fa-lock"></i>
+                        Senha:
+                    </label>
+                    <input type="password" id="password" required placeholder="Digite sua senha">
+                </div>
+                <button type="submit" class="btn-login">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Entrar
+                </button>
+                <div id="login-error" class="login-error"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Conteúdo Principal (existente) -->
+    <div id="main-content" class="container" style="display: none;">
+        <div class="header">
+            <h1>Controle Financeiro</h1>
+            <button id="btn-logout" class="btn-logout">
+                <i class="fas fa-sign-out-alt"></i>
+                Sair
+            </button>
+        </div>
         
         <!-- Abas de navegação -->
         <div class="tabs">

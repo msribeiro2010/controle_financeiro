@@ -76,6 +76,67 @@ const relatorioSaudeFinanceira = document.getElementById('relatorio-saude-financ
 const tabelaCategoriasBody = document.getElementById('tabela-categorias-body');
 const dicasContainer = document.getElementById('dicas-container');
 
+// Login
+const DEMO_USER = 'Marcelo';
+const DEMO_PASSWORD = 'senha1234';
+
+function inicializarLogin() {
+    const loginForm = document.getElementById('login-form');
+    const loginScreen = document.getElementById('login-screen');
+    const mainContent = document.getElementById('main-content');
+    const loginError = document.getElementById('login-error');
+    const btnLogout = document.getElementById('btn-logout');
+
+    // Verificar se já está logado
+    if (localStorage.getItem('isLoggedIn') === 'true') {
+        loginScreen.style.display = 'none';
+        mainContent.style.display = 'block';
+        return;
+    }
+
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        if (username === DEMO_USER && password === DEMO_PASSWORD) {
+            localStorage.setItem('isLoggedIn', 'true');
+            loginScreen.style.display = 'none';
+            mainContent.style.display = 'block';
+            loginError.textContent = '';
+            
+            // Inicializar o resto da aplicação após login
+            inicializarAplicacao();
+        } else {
+            loginError.textContent = 'Usuário ou senha incorretos';
+            loginForm.reset();
+        }
+    });
+
+    // Adicionar funcionalidade de logout
+    btnLogout.addEventListener('click', () => {
+        localStorage.removeItem('isLoggedIn');
+        mainContent.style.display = 'none';
+        loginScreen.style.display = 'flex';
+        loginForm.reset();
+        loginError.textContent = '';
+    });
+}
+
+// Função para inicializar a aplicação após o login
+function inicializarAplicacao() {
+    inicializarNavegacao();
+    carregarConfiguracoes();
+    carregarTransacoes();
+    atualizarDashboard();
+}
+
+// Inicializar o sistema de login quando a página carregar
+document.addEventListener('DOMContentLoaded', () => {
+    inicializarLogin();
+});
+
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
     // Verificar elementos críticos antes de prosseguir
