@@ -1151,3 +1151,303 @@ h3 {
 .btn-logout:hover {
     background: #c82333;
 }
+
+/* --- RELATÓRIOS MODERNOS --- */
+
+/* Container principal do relatório */
+.relatorio-content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    margin-top: 24px;
+}
+
+/* Cards de resumo financeiro */
+.resumo-grid {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+.resumo-item {
+    background: linear-gradient(135deg, #f1f5f9 60%, #e0e7ff 100%);
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(60,72,100,0.08);
+    padding: 24px 20px 18px 20px;
+    min-width: 180px;
+    flex: 1 1 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    position: relative;
+    margin-bottom: 0;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+.resumo-item .label {
+    font-size: 1rem;
+    color: #64748b;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+.resumo-item .valor {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+.resumo-item .positivo { color: #10b981; }
+.resumo-item .negativo { color: #ef4444; }
+.resumo-item .comparativo {
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-top: 2px;
+    color: #2563eb;
+}
+.resumo-item .status {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-top: 2px;
+    color: #64748b;
+}
+
+/* Botão exportar PDF mais destacado */
+#btn-exportar-relatorio {
+    background: linear-gradient(90deg, #2563eb 60%, #60a5fa 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 600;
+    font-size: 1rem;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.08);
+    transition: background 0.2s, box-shadow 0.2s;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+#btn-exportar-relatorio:hover {
+    background: linear-gradient(90deg, #1d4ed8 60%, #38bdf8 100%);
+    box-shadow: 0 4px 16px rgba(37,99,235,0.12);
+}
+
+/* Gráficos em cards modernos */
+.graficos-container {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+.grafico-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(60,72,100,0.08);
+    padding: 18px 18px 12px 18px;
+    flex: 1 1 320px;
+    min-width: 280px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+.grafico-card .card-header {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2563eb;
+    margin-bottom: 10px;
+}
+.grafico-wrapper {
+    width: 100%;
+    min-height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Tabela de categorias moderna */
+.tabela-categorias {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(60,72,100,0.06);
+    margin-top: 8px;
+}
+.tabela-categorias th, .tabela-categorias td {
+    padding: 12px 14px;
+    text-align: left;
+}
+.tabela-categorias th {
+    background: #f1f5f9;
+    color: #2563eb;
+    font-weight: 700;
+    font-size: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+.tabela-categorias tbody tr:nth-child(even) {
+    background: #f8fafc;
+}
+.tabela-categorias tbody tr:hover {
+    background: #e0e7ff;
+}
+.tabela-categorias td {
+    font-size: 0.98rem;
+    color: #334155;
+}
+.tabela-categorias td.positivo {
+    color: #10b981;
+    font-weight: 600;
+}
+.tabela-categorias td.negativo {
+    color: #ef4444;
+    font-weight: 600;
+}
+.tabela-categorias td.neutro {
+    color: #64748b;
+    font-weight: 600;
+}
+
+/* Dicas de economia em cards */
+.dicas-container {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+.dica {
+    background: linear-gradient(135deg, #e0e7ff 60%, #f1f5f9 100%);
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(60,72,100,0.06);
+    padding: 18px 16px;
+    min-width: 220px;
+    flex: 1 1 220px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 0;
+}
+.dica-icone {
+    font-size: 2rem;
+    color: #2563eb;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+.dica-conteudo h4 {
+    margin: 0 0 4px 0;
+    font-size: 1.08rem;
+    color: #334155;
+    font-weight: 700;
+}
+.dica-conteudo p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.98rem;
+}
+
+/* Formulário de filtros do relatório */
+.relatorio-form {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 18px 20px 10px 20px;
+    margin-bottom: 18px;
+    box-shadow: 0 1px 4px rgba(60,72,100,0.04);
+}
+.relatorio-form .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 140px;
+}
+.relatorio-form label {
+    font-size: 0.98rem;
+    color: #2563eb;
+    font-weight: 600;
+}
+.relatorio-form select {
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1.5px solid #cbd5e1;
+    background: #fff;
+    font-size: 1rem;
+    color: #334155;
+}
+.btn-primario {
+    background: linear-gradient(90deg, #2563eb 60%, #60a5fa 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.08);
+    transition: background 0.2s, box-shadow 0.2s;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.btn-primario:hover {
+    background: linear-gradient(90deg, #1d4ed8 60%, #38bdf8 100%);
+    box-shadow: 0 4px 16px rgba(37,99,235,0.12);
+}
+
+/* Mensagem de sem dados */
+.sem-dados {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 32px 0;
+    color: #64748b;
+    font-size: 1.1rem;
+    margin-top: 18px;
+    box-shadow: 0 1px 4px rgba(60,72,100,0.04);
+}
+.sem-dados i {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    color: #2563eb;
+    opacity: 0.7;
+}
+
+/* Responsividade para relatórios */
+@media (max-width: 900px) {
+    .resumo-grid, .graficos-container, .dicas-container {
+        flex-direction: column;
+        gap: 16px;
+    }
+    .grafico-card, .dica {
+        min-width: 0;
+    }
+}
+@media (max-width: 600px) {
+    .relatorio-form {
+        flex-direction: column;
+        gap: 10px;
+        padding: 12px 8px 8px 8px;
+    }
+    .resumo-grid {
+        gap: 10px;
+    }
+    .graficos-container {
+        gap: 10px;
+    }
+    .dicas-container {
+        gap: 10px;
+    }
+    .grafico-card {
+        padding: 10px 4px 8px 4px;
+    }
+    .tabela-categorias th, .tabela-categorias td {
+        padding: 8px 6px;
+    }
+}
+
+/* --- FIM RELATÓRIOS MODERNOS --- */
