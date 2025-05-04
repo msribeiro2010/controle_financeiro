@@ -77,7 +77,7 @@ const tabelaCategoriasBody = document.getElementById('tabela-categorias-body');
 const dicasContainer = document.getElementById('dicas-container');
 
 // Login
-const DEMO_USER = 'Marcelo';
+const DEMO_USER = 'demo';
 const DEMO_PASSWORD = 'senha1234';
 
 function inicializarLogin() {
