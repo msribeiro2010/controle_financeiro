@@ -47,7 +47,7 @@
     <div id="main-content" class="container" style="display: none;">
         <div class="header">
             <h1>Controle Financeiro</h1>
-            <button id="btn-logout" class="btn-logout" onclick="realizarLogout()">
+            <button id="btn-logout" class="btn-logout" onclick="localStorage.removeItem('isLoggedIn'); document.getElementById('main-content').style.display='none'; document.getElementById('login-screen').style.display='flex'; alert('Logout realizado!');" type="button">
                 <i class="fas fa-sign-out-alt"></i>
                 Sair
             </button>
@@ -538,5 +538,65 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="script.js"></script>
+    
+    <!-- Script adicional para garantir que o logout funcione -->
+    <script>
+        console.log('🔧 Script adicional carregado');
+        
+        // Garantir que a função logout esteja disponível globalmente
+        window.realizarLogout = function() {
+            console.log('🚪 LOGOUT ACIONADO via window');
+            alert('Botão clicado! Executando logout...');
+            
+            // Método direto simples
+            localStorage.removeItem('isLoggedIn');
+            document.getElementById('main-content').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('login-form').reset();
+            
+            console.log('✅ Logout simples concluído');
+            alert('Logout concluído!');
+        };
+        
+        // Aguardar o DOM carregar e configurar evento adicional
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔧 Configurando evento de logout adicional...');
+            
+            const btnLogout = document.getElementById('btn-logout');
+            if (btnLogout) {
+                console.log('🎯 Botão logout encontrado, adicionando evento...');
+                
+                // Remover qualquer evento anterior
+                btnLogout.onclick = null;
+                
+                // Adicionar evento novo
+                btnLogout.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('🚪 Evento click disparado no botão logout');
+                    window.realizarLogout();
+                });
+                
+                // Backup com onclick
+                btnLogout.onclick = function(e) {
+                    e.preventDefault();
+                    console.log('🚪 onclick disparado no botão logout');
+                    window.realizarLogout();
+                };
+                
+                console.log('✅ Eventos de logout configurados');
+            } else {
+                console.error('❌ Botão logout não encontrado!');
+            }
+        });
+        
+        // Teste direto
+        console.log('🧪 Testando disponibilidade da função...');
+        if (typeof window.realizarLogout === 'function') {
+            console.log('✅ Função realizarLogout disponível');
+        } else {
+            console.error('❌ Função realizarLogout NÃO disponível');
+        }
+    </script>
 </body>
 </html>

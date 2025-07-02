@@ -198,23 +198,29 @@ document.addEventListener('DOMContentLoaded', () => {
     inicializarLogin();
 });
 
-// Função global de logout
+// Função global de logout - versão simplificada e robusta
 function realizarLogout() {
-    console.log('Executando logout...');
+    console.log('🚪 FUNÇÃO LOGOUT CHAMADA!');
+    alert('Logout chamado!'); // Debug visual temporário
     
     try {
-        // Remover dados do localStorage
+        console.log('📦 Removendo isLoggedIn do localStorage...');
         localStorage.removeItem('isLoggedIn');
         
-        // Esconder conteúdo principal
+        console.log('🖥️ Procurando elementos DOM...');
         const mainContent = document.getElementById('main-content');
+        const loginScreen = document.getElementById('login-screen');
+        
+        console.log('main-content encontrado:', !!mainContent);
+        console.log('login-screen encontrado:', !!loginScreen);
+        
         if (mainContent) {
+            console.log('🔒 Escondendo conteúdo principal...');
             mainContent.style.display = 'none';
         }
         
-        // Mostrar tela de login
-        const loginScreen = document.getElementById('login-screen');
         if (loginScreen) {
+            console.log('🔓 Mostrando tela de login...');
             loginScreen.style.display = 'flex';
         }
         
@@ -230,28 +236,34 @@ function realizarLogout() {
             loginError.textContent = '';
         }
         
-        // Limpar formulários da aplicação
-        if (typeof limparFormularios === 'function') {
-            limparFormularios();
-        }
+        console.log('✅ Logout realizado com sucesso!');
+        alert('Logout concluído!'); // Debug visual temporário
         
-        // Mostrar notificação de logout
-        if (typeof mostrarNotificacao === 'function') {
-            mostrarNotificacao('Logout realizado com sucesso!', 'sucesso');
-        }
-        
-        console.log('Logout realizado com sucesso');
         return true;
         
     } catch (error) {
-        console.error('Erro durante logout:', error);
+        console.error('❌ ERRO durante logout:', error);
+        alert('ERRO no logout: ' + error.message); // Debug visual temporário
         
         // Forçar logout recarregando a página
         localStorage.removeItem('isLoggedIn');
-        location.reload();
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+        
         return false;
     }
 }
+
+// Função alternativa de logout via window
+window.realizarLogout = function() {
+    console.log('🔄 Logout chamado via window...');
+    realizarLogout();
+};
+
+// Garantir que a função esteja disponível globalmente
+window.sair = realizarLogout;
+window.logout = realizarLogout;
 
 // Função adicional para debug do logout
 function debugLogout() {
@@ -259,6 +271,8 @@ function debugLogout() {
     console.log('=== DEBUG LOGOUT ===');
     console.log('Botão encontrado:', btnLogout);
     console.log('Estado do localStorage:', localStorage.getItem('isLoggedIn'));
+    console.log('Função realizarLogout disponível:', typeof realizarLogout);
+    console.log('window.realizarLogout disponível:', typeof window.realizarLogout);
     
     // Tentar executar logout diretamente
     if (btnLogout) {
@@ -266,6 +280,32 @@ function debugLogout() {
         realizarLogout();
     }
 }
+
+// Função de teste direto que SEMPRE funciona
+function testeLogout() {
+    console.log('🧪 TESTE DIRETO DE LOGOUT');
+    alert('Teste de logout iniciado');
+    
+    try {
+        localStorage.removeItem('isLoggedIn');
+        
+        const mainContent = document.getElementById('main-content');
+        const loginScreen = document.getElementById('login-screen');
+        
+        if (mainContent) mainContent.style.display = 'none';
+        if (loginScreen) loginScreen.style.display = 'flex';
+        
+        alert('Teste de logout concluído!');
+        console.log('✅ Teste direto funcionou');
+    } catch (e) {
+        alert('Erro no teste: ' + e.message);
+        console.error('❌ Erro no teste:', e);
+    }
+}
+
+// Disponibilizar globalmente
+window.debugLogout = debugLogout;
+window.testeLogout = testeLogout;
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
