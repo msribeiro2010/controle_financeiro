@@ -1486,15 +1486,16 @@ function gerarGraficoCategoria(transacoes) {
     // Agrupar despesas por categoria
     const categorias = {};
     const cores = {
-        'alimentacao': '#FF6384',
-        'transporte': '#36A2EB',
-        'lazer': '#FFCE56',
-        'saude': '#4BC0C0',
-        'educacao': '#9966FF',
-        'moradia': '#FF9F40',
-        'outros': '#C9CBCF',
-        'salario': '#7CFC00'
-    };
+    'alimentacao': '#FF6384',
+    'transporte': '#36A2EB',
+    'lazer': '#FFCE56',
+    'saude': '#4BC0C0',
+    'educacao': '#9966FF',
+    'moradia': '#FF9F40',
+    'cartao-credito': '#FF4444',
+    'outros': '#C9CBCF',
+    'salario': '#7CFC00'
+};
     
     // Considerar apenas despesas (valores negativos)
     transacoes.filter(t => t.valor < 0).forEach(t => {
@@ -1765,6 +1766,12 @@ function gerarDicasEconomia(transacoes) {
                     texto: 'Reavalie contratos de aluguel, considere renegociar ou busque alternativas mais econômicas para reduzir esse custo fixo.'
                 });
                 break;
+            case 'cartao-credito':
+                dicas.push({
+                    titulo: 'Cartão de Crédito',
+                    texto: 'Controle os gastos no cartão de crédito, evite parcelamentos desnecessários e procure quitar a fatura integralmente para evitar juros altos.'
+                });
+                break;
             default:
                 dicas.push({
                     titulo: 'Controle de gastos',
@@ -1827,6 +1834,7 @@ function formatarCategoria(categoria) {
         'saude': 'Saúde',
         'educacao': 'Educação',
         'moradia': 'Moradia',
+        'cartao-credito': 'Cartão de Crédito',
         'outros': 'Outros'
     };
     
