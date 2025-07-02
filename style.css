@@ -1898,11 +1898,29 @@ h3 {
     gap: 0.5rem;
     font-weight: 500;
     box-shadow: var(--shadow-sm);
+    position: relative;
+    z-index: 10;
+    outline: none;
+    text-decoration: none;
+    font-size: 0.875rem;
+    min-height: 44px;
+    user-select: none;
 }
 
 .btn-logout:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
+    filter: brightness(1.1);
+}
+
+.btn-logout:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-logout:focus {
+    outline: 2px solid var(--danger-color);
+    outline-offset: 2px;
 }
 
 /* --- RELATÓRIOS MODERNOS --- */

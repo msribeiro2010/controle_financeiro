@@ -87,10 +87,50 @@ function inicializarLogin() {
     const loginError = document.getElementById('login-error');
     const btnLogout = document.getElementById('btn-logout');
 
+    // Configurar funcionalidade de logout (sempre)
+    if (btnLogout) {
+        // Remover qualquer event listener existente
+        btnLogout.removeEventListener('click', realizarLogout);
+        
+        // Adicionar event listener
+        btnLogout.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Botão logout clicado!');
+            realizarLogout();
+        });
+        
+        // Adicionar também com onclick como backup
+        btnLogout.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Botão logout clicado via onclick!');
+            realizarLogout();
+        };
+        
+        console.log('Event listener de logout configurado com sucesso');
+    } else {
+        console.error('Botão de logout não encontrado no DOM');
+        
+        // Tentar configurar depois que o DOM estiver pronto
+        setTimeout(() => {
+            const btnLogoutDelayed = document.getElementById('btn-logout');
+            if (btnLogoutDelayed) {
+                console.log('Botão logout encontrado após delay');
+                btnLogoutDelayed.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    realizarLogout();
+                });
+            }
+        }, 1000);
+    }
+
     // Verificar se já está logado
     if (localStorage.getItem('isLoggedIn') === 'true') {
         loginScreen.style.display = 'none';
         mainContent.style.display = 'block';
+        // Inicializar a aplicação se já estiver logado
+        inicializarAplicacao();
         return;
     }
 
@@ -108,19 +148,14 @@ function inicializarLogin() {
             
             // Inicializar o resto da aplicação após login
             inicializarAplicacao();
+            
+            // Mostrar notificação de login bem-sucedido
+            mostrarNotificacao('Login realizado com sucesso!', 'sucesso');
         } else {
             loginError.textContent = 'Usuário ou senha incorretos';
             loginForm.reset();
+            mostrarNotificacao('Usuário ou senha incorretos', 'erro');
         }
-    });
-
-    // Adicionar funcionalidade de logout
-    btnLogout.addEventListener('click', () => {
-        localStorage.removeItem('isLoggedIn');
-        document.getElementById('main-content').style.display = 'none';
-        document.getElementById('login-screen').style.display = 'flex';
-        document.getElementById('login-form').reset();
-        document.getElementById('login-error').textContent = '';
     });
 }
 
@@ -134,8 +169,103 @@ function inicializarAplicacao() {
 
 // Inicializar o sistema de login quando a página carregar
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM carregado, inicializando login...');
+    
+    // Verificar se os elementos críticos existem
+    const elementos = {
+        'login-form': document.getElementById('login-form'),
+        'login-screen': document.getElementById('login-screen'),
+        'main-content': document.getElementById('main-content'),
+        'btn-logout': document.getElementById('btn-logout')
+    };
+    
+    console.log('Elementos encontrados:', elementos);
+    
+    // Verificar especificamente o botão de logout
+    const btnLogout = document.getElementById('btn-logout');
+    if (btnLogout) {
+        console.log('Botão logout encontrado:', btnLogout);
+        console.log('Classes do botão:', btnLogout.className);
+        console.log('Estilo display:', getComputedStyle(btnLogout).display);
+        console.log('Estilo pointer-events:', getComputedStyle(btnLogout).pointerEvents);
+    } else {
+        console.error('ERRO: Botão de logout não encontrado!');
+        // Tentar encontrar por classe
+        const btnLogoutByClass = document.querySelector('.btn-logout');
+        console.log('Tentativa por classe:', btnLogoutByClass);
+    }
+    
     inicializarLogin();
 });
+
+// Função global de logout
+function realizarLogout() {
+    console.log('Executando logout...');
+    
+    try {
+        // Remover dados do localStorage
+        localStorage.removeItem('isLoggedIn');
+        
+        // Esconder conteúdo principal
+        const mainContent = document.getElementById('main-content');
+        if (mainContent) {
+            mainContent.style.display = 'none';
+        }
+        
+        // Mostrar tela de login
+        const loginScreen = document.getElementById('login-screen');
+        if (loginScreen) {
+            loginScreen.style.display = 'flex';
+        }
+        
+        // Limpar formulário de login
+        const loginForm = document.getElementById('login-form');
+        if (loginForm) {
+            loginForm.reset();
+        }
+        
+        // Limpar erros de login
+        const loginError = document.getElementById('login-error');
+        if (loginError) {
+            loginError.textContent = '';
+        }
+        
+        // Limpar formulários da aplicação
+        if (typeof limparFormularios === 'function') {
+            limparFormularios();
+        }
+        
+        // Mostrar notificação de logout
+        if (typeof mostrarNotificacao === 'function') {
+            mostrarNotificacao('Logout realizado com sucesso!', 'sucesso');
+        }
+        
+        console.log('Logout realizado com sucesso');
+        return true;
+        
+    } catch (error) {
+        console.error('Erro durante logout:', error);
+        
+        // Forçar logout recarregando a página
+        localStorage.removeItem('isLoggedIn');
+        location.reload();
+        return false;
+    }
+}
+
+// Função adicional para debug do logout
+function debugLogout() {
+    const btnLogout = document.getElementById('btn-logout');
+    console.log('=== DEBUG LOGOUT ===');
+    console.log('Botão encontrado:', btnLogout);
+    console.log('Estado do localStorage:', localStorage.getItem('isLoggedIn'));
+    
+    // Tentar executar logout diretamente
+    if (btnLogout) {
+        console.log('Tentando executar logout...');
+        realizarLogout();
+    }
+}
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
